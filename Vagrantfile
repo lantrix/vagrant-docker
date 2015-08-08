@@ -1,16 +1,31 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$dockerinit = <<SCRIPT
-echo Install Docker
+$predocker = <<SCRIPT
+echo Pre Docker requirements
+sed -i 's/^mesg n$/tty -s \&\& mesg n/g' /root/.profile
 apt-get update
 apt-get install wget
+apt-get install -y linux-image-virtual linux-image-extra-virtual
+SCRIPT
+
+$dockerinit = <<SCRIPT
+echo Install Docker
 wget -qO- https://get.docker.com/ | sh
 #vagrant user can use docker
 usermod -aG docker vagrant
 SCRIPT
 
+#Requires Vagrant Reload plugin
+#https://github.com/aidanns/vagrant-reload
 Vagrant.configure(2) do |config|
   config.vm.box = "hashicorp/precise64"
+  #Pre-reboot provision
+  config.vm.provision "shell", inline: $predocker
+
+  # Run a reboot of a *NIX guest.
+  config.vm.provision :reload
+
+  #Post-reboot provision
   config.vm.provision "shell", inline: $dockerinit
 end
