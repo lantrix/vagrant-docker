@@ -3,7 +3,9 @@
 
 $dockerinit = <<SCRIPT
 echo Install Docker
-curl https://get.docker.com/ | sh
+apt-get update
+apt-get install wget
+wget -qO- https://get.docker.com/ | sh
 SCRIPT
 
 Vagrant.configure(2) do |config|
